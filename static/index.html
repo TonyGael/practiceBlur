@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blur Streamer</title>
+    <style>
+        body { 
+            background-color: #111; 
+            color: white; 
+            text-align: center; 
+            font-family: sans-serif; 
+        }
+        #outputImage { 
+            max-width: 100%; 
+            height: auto; 
+            border: 2px solid #444; 
+            border-radius: 8px; 
+            margin-top: 20px;
+        }
+        video, canvas { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <h2>Live Face Blur</h2>
+    
+    <video id="videoElement" autoplay playsinline></video>
+    <canvas id="canvasElement"></canvas>
+
+    <img id="outputImage" alt="Esperando stream..." />
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
