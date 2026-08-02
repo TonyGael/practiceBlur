@@ -4,18 +4,32 @@ Este repositorio es un entorno de práctica aislado desarrollado como prueba de 
 
 ## 📸 Demostración
 
-![Primera Captura - Face Blur](primera_captura.jpeg)
+![Primera Captura - Face Blur](first_capture.jpeg)
 
-## ⚙️ Arquitectura y Stack Tecnológico
+## ⚙️ Arquitectura y Flujo de Datos (Pipeline)
 
-El sistema utiliza una arquitectura cliente-servidor orientada al streaming de baja latencia en redes locales o túneles VPN:
+El sistema utiliza una arquitectura cliente-servidor orientada al streaming de baja latencia en redes locales o túneles VPN, evitando el *overhead* de peticiones HTTP tradicionales.
 
-*   **Frontend:** HTML5 y Vanilla JavaScript. Captura la cámara del dispositivo mediante `getUserMedia` y extrae frames en base64 usando un `<canvas>` oculto (a 10 FPS por defecto).
-*   **Comunicación:** WebSockets (bidireccional) para mantener un flujo continuo de frames sin el *overhead* de peticiones HTTP tradicionales.
-*   **Backend:** Python con **FastAPI** (enrutamiento) y **Uvicorn** (servidor ASGI).
-*   **Procesamiento (Computer Vision):** 
-    *   **MediaPipe Tasks API (Vision):** Detección de rostros ultrarrápida optimizada para correr exclusivamente en CPU mediante el modelo BlazeFace.
-    *   **OpenCV (`cv2`):** Decodificación de imagen, recorte (bounding box) y aplicación del filtro espacial (Gaussian Blur) sobre los rostros detectados.
+```text
+📱 Cliente (Navegador Móvil)                  🖥️ Servidor (Backend Python)
+┌─────────────────────────┐                   ┌─────────────────────────────────┐
+│ 📷 getUserMedia (Cámara)│                   │ ⚡ FastAPI: WebSocket Endpoint   │
+│           │             │    Frame Base64   │           │                     │
+│           ▼             │ ────────────────► │           ▼                     │
+│ 🖼️ Canvas (Extracción)  │      (10 FPS)     │ 🧠 OpenCV: Decodifica           │
+│           ▲             │                   │ 🤖 MediaPipe: Detecta Rostro    │
+│           │             │    Frame Base64   │ 🌫️ OpenCV: Bounding Box + Blur  │
+│ 📺 <img> (Renderizado)  │ ◄──────────────── │ 📦 OpenCV: Recodifica a JPEG    │
+└─────────────────────────┘                   └─────────────────────────────────┘
+```
+
+### Stack Tecnológico
+*   **Frontend:** HTML5 y Vanilla JavaScript.
+*   **Comunicación:** WebSockets (bidireccional).
+*   **Backend:** Python con **FastAPI** y **Uvicorn**.
+*   **Computer Vision:** 
+    *   **MediaPipe Tasks API:** Detección de rostros ultrarrápida (BlazeFace) en CPU.
+    *   **OpenCV (`cv2`):** Manipulación matricial y filtro espacial (Gaussian Blur).
 
 ## 🚀 Instalación y Despliegue Local
 
@@ -29,7 +43,7 @@ pip install -r requirements.txt
 ```
 
 ### 2. Descargar el modelo de MediaPipe
-El backend utiliza la API moderna de MediaPipe Tasks, por lo que requiere tener el archivo binario del modelo explícitamente en la raíz del proyecto. Descargalo con:
+El backend utiliza la API moderna de MediaPipe Tasks, requiriendo el archivo binario del modelo en la raíz del proyecto:
 ```bash
 wget -O detector.tflite https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite
 ```
@@ -39,16 +53,23 @@ wget -O detector.tflite https://storage.googleapis.com/mediapipe-models/face_det
 uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
-## 🌐 Acceso y Pruebas con HTTPS
-Para que los navegadores (especialmente en dispositivos móviles) permitan el acceso a la cámara vía WebRTC/MediaDevices, la conexión debe ser en un contexto seguro (`https://` o `localhost`). 
+## 🌐 Acceso y Pruebas con HTTPS (Tailscale)
 
-Para pruebas desde otros dispositivos, se recomienda utilizar **Tailscale Funnel** para exponer el puerto local mediante un túnel con certificado SSL válido:
+Las APIs del navegador para acceder a la cámara exigen un contexto seguro (`https://`). Para pruebas remotas sin configurar certificados SSL manuales, utilizamos **Tailscale Funnel**:
 
 ```bash
 # Ejecutar en otra terminal del servidor:
 tailscale funnel 8000
 ```
-Luego, ingresar desde el dispositivo móvil a la URL `.ts.net` generada.
+Luego, ingresar desde el dispositivo móvil a la URL `.ts.net` generada por el túnel.
 
----
-*Módulo experimental en desarrollo.*
+## 🗺️ Roadmap y Estado del Proyecto
+
+- [x] Setup inicial de arquitectura cliente-servidor con WebSockets.
+- [x] Captura de video en frontend (Vanilla JS) y envío de frames en Base64.
+- [x] Integración de MediaPipe Tasks API para detección de rostros optimizada en CPU.
+- [x] Aplicación de desenfoque (Gaussian Blur) básico sobre el bounding box usando OpenCV.
+- [x] Exposición segura a través de internet usando Tailscale Funnel.
+- [ ] **Implementar padding dinámico en el bounding box para cubrir áreas periféricas (cabello, orejas, mandíbula) y mejorar la anonimización real.**
+- [ ] Ajustar el nivel de desenfoque y compresión JPEG para optimizar latencia.
+- [ ] Preparar el código como módulo/middleware para su integración final en SenseAI.

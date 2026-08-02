@@ -1,6 +1,6 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
-from servicios import process_frame
+from services import process_frame
 
 router = APIRouter()
 

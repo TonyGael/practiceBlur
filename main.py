@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from rutas import router
+from routes import router
 
 app = FastAPI()
 
