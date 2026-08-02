@@ -26,13 +26,33 @@ def process_frame(data_url: str) -> str:
             x, y = bbox.origin_x, bbox.origin_y
             w, h = bbox.width, bbox.height
             
-            x, y = max(0, x), max(0, y)
+            # cálculo de padding dinámico ( 25% porprocional)
+            pad_x = int(w * 0.25)
+            pad_y = int(h * 0.25)
             
-            if y + h <= ih and x + w <= iw:
-                rostro = img[y:y+h, x:x+w]
+            # expansión de la caja, mayor margen superior para frente/cabello
+            nuevo_x = max(0, x - pad_x)
+            nuevo_y = max(0, int(y - (pad_y * 1.5)))
+            
+            # límite másximo anclado a la resolución del frame
+            x_fin = min(iw, x + w + pad_x)
+            y_fin = min(ih, x + h + pad_y)
+            
+            # se valida que la nea caja sea un área real
+            if y_fin > nuevo_y and x_fin > nuevo_x:
+                rostro = img[nuevo_y:y_fin, nuevo_x:x_fin]
+                
                 if rostro.size != 0:
                     rostro_blur = cv2.GaussianBlur(rostro, (99, 99), 30)
-                    img[y:y+h, x:x+w] = rostro_blur
+                    img[nuevo_y:y_fin, nuevo_x:x_fin] = rostro_blur
+            
+            
+            
+            
+            
+            
+            
+            
 
     _, buffer = cv2.imencode('.jpg', img)
     return "data:image/jpeg;base64," + base64.b64encode(buffer).decode('utf-8')

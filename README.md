@@ -2,9 +2,13 @@
 
 Este repositorio es un entorno de práctica aislado desarrollado como prueba de concepto para ser integrado a futuro en **SenseAI** (asistente de orientación por voz local). El objetivo de este módulo es garantizar la privacidad de terceros mediante la anonimización (blur/desenfoque) de rostros en tiempo real antes de que los frames pasen a los modelos de visión.
 
-## 📸 Demostración
+## 📸 Demostración y Evolución
 
+**Fase 1: Bounding Box Crudo (Recorte básico)**
 ![Primera Captura - Face Blur](first_capture.jpeg)
+
+**Fase 2: Padding Dinámico (Anonimización completa de fisonomía)**
+![Segunda Captura - Padding Dinámico](second_capture.jpeg)
 
 ## ⚙️ Arquitectura y Flujo de Datos (Pipeline)
 
@@ -29,7 +33,7 @@ El sistema utiliza una arquitectura cliente-servidor orientada al streaming de b
 *   **Backend:** Python con **FastAPI** y **Uvicorn**.
 *   **Computer Vision:** 
     *   **MediaPipe Tasks API:** Detección de rostros ultrarrápida (BlazeFace) en CPU.
-    *   **OpenCV (`cv2`):** Manipulación matricial y filtro espacial (Gaussian Blur).
+    *   **OpenCV (`cv2`):** Manipulación matricial y filtro espacial (Gaussian Blur con padding dinámico).
 
 ## 🚀 Instalación y Despliegue Local
 
@@ -70,6 +74,6 @@ Luego, ingresar desde el dispositivo móvil a la URL `.ts.net` generada por el t
 - [x] Integración de MediaPipe Tasks API para detección de rostros optimizada en CPU.
 - [x] Aplicación de desenfoque (Gaussian Blur) básico sobre el bounding box usando OpenCV.
 - [x] Exposición segura a través de internet usando Tailscale Funnel.
-- [ ] **Implementar padding dinámico en el bounding box para cubrir áreas periféricas (cabello, orejas, mandíbula) y mejorar la anonimización real.**
+- [x] Implementar padding dinámico en el bounding box para cubrir áreas periféricas (cabello, orejas, mandíbula) y mejorar la anonimización real.
 - [ ] Ajustar el nivel de desenfoque y compresión JPEG para optimizar latencia.
 - [ ] Preparar el código como módulo/middleware para su integración final en SenseAI.
